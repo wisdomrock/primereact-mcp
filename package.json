@@ -4,7 +4,7 @@
   "description": "MCP server for PrimeReact v10 component documentation — props, events, examples, and search for AI assistants",
   "type": "module",
   "bin": {
-    "primereact-mcp": "./index.mjs"
+    "primereact-mcp": "index.mjs"
   },
   "files": [
     "index.mjs",
@@ -35,7 +35,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jun-shi/primereact-mcp.git"
+    "url": "git+https://github.com/jun-shi/primereact-mcp.git"
   },
   "homepage": "https://github.com/jun-shi/primereact-mcp#readme",
   "bugs": {
