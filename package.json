@@ -1,0 +1,53 @@
+{
+  "name": "primereact-mcp",
+  "version": "1.0.1",
+  "description": "MCP server for PrimeReact v10 component documentation — props, events, examples, and search for AI assistants",
+  "type": "module",
+  "bin": {
+    "primereact-mcp": "./index.mjs"
+  },
+  "files": [
+    "index.mjs",
+    "generate-data.mjs",
+    "components-data.json",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "generate": "node generate-data.mjs",
+    "start": "node index.mjs"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "primereact",
+    "react",
+    "components",
+    "documentation",
+    "claude",
+    "ai",
+    "cursor",
+    "windsurf",
+    "primefaces"
+  ],
+  "author": "Jun Shi",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jun-shi/primereact-mcp.git"
+  },
+  "homepage": "https://github.com/jun-shi/primereact-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/jun-shi/primereact-mcp/issues"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@primeuix/mcp": "^1.0.1"
+  },
+  "devDependencies": {
+    "primereact": "10.9.8"
+  }
+}
