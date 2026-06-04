@@ -31,7 +31,7 @@ Use `npx -y primereact-mcp` directly in your MCP client config. Component data s
 ### Option B — clone and run locally
 
 ```bash
-git clone https://github.com/jun-shi/primereact-mcp.git
+git clone https://github.com/wisdomrock/primereact-mcp.git
 cd primereact-mcp
 npm install
 node index.mjs   # starts the server
