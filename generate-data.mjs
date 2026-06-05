@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Generates components-data.json from primereact v10 TypeScript definitions.
+ * Generates components-data.json from primereact TypeScript definitions.
  * Requires primereact to be installed (npm install primereact@10).
  * Run once: node generate-data.mjs
  */
@@ -42,15 +42,12 @@ async function findPrimereactDir() {
     );
 }
 
-const primereactDir = await findPrimereactDir();
-console.error(`Using primereact from: ${primereactDir}`);
-
-function capitalize(s) {
+export function capitalize(s) {
     return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
 // Extract the module-level description from the file's first /** */ block
-function extractModuleDescription(content) {
+export function extractModuleDescription(content) {
     const match = content.match(/^\/\*\*([\s\S]*?)\*\//);
     if (!match) return '';
     return match[1]
@@ -62,7 +59,7 @@ function extractModuleDescription(content) {
 }
 
 // Find a named interface block and return its body text
-function extractInterfaceBody(content, interfaceName) {
+export function extractInterfaceBody(content, interfaceName) {
     const idx = content.indexOf(`interface ${interfaceName}`);
     if (idx === -1) return null;
 
@@ -82,10 +79,8 @@ function extractInterfaceBody(content, interfaceName) {
 }
 
 // Parse props from an interface body string
-function parseProps(body) {
+export function parseProps(body) {
     const props = [];
-    // Split on property lines: identifier followed by ?: or : and ending with ;
-    // We walk line by line, accumulating JSDoc and then emitting on a prop line
     const lines = body.split('\n');
     let jsdocLines = [];
     let inJsDoc = false;
@@ -112,7 +107,7 @@ function parseProps(body) {
         const propMatch = trimmed.match(/^(\w+)\??:\s*(.+?);?\s*$/);
         if (propMatch && !trimmed.startsWith('//') && !trimmed.startsWith('[')) {
             const [, name, rawType] = propMatch;
-            // Skip index signatures and generic helpers
+            // Skip children prop
             if (name === 'children') { jsdocLines = []; continue; }
 
             const description = jsdocLines.join(' ').trim() || `The ${name} prop.`;
@@ -128,7 +123,7 @@ function parseProps(body) {
     return props;
 }
 
-function buildSections(componentName, regularProps, eventProps) {
+export function buildSections(componentName, regularProps, eventProps) {
     const importStmt = `import { ${capitalize(componentName)} } from 'primereact/${componentName}';`;
     const basicExample = buildBasicJsx(componentName, regularProps.slice(0, 3));
 
@@ -154,7 +149,7 @@ function buildSections(componentName, regularProps, eventProps) {
     ];
 }
 
-function buildBasicJsx(name, sampleProps) {
+export function buildBasicJsx(name, sampleProps) {
     const tag = capitalize(name);
     if (sampleProps.length === 0) return `<${tag} />`;
     const attrs = sampleProps
@@ -169,7 +164,7 @@ function buildBasicJsx(name, sampleProps) {
     return attrs ? `<${tag}\n    ${attrs}\n/>` : `<${tag} />`;
 }
 
-async function processComponent(name) {
+export async function processComponent(name, primereactDir) {
     const dtsPath = join(primereactDir, name, `${name}.d.ts`);
     try {
         await access(dtsPath);
@@ -185,7 +180,6 @@ async function processComponent(name) {
     const primaryName = capitalize(name) + 'Props';
     let body = extractInterfaceBody(content, primaryName);
     if (!body) {
-        // Some components use a different name (e.g. CalendarProps for calendar)
         const match = content.match(/export interface (\w+Props)/);
         if (match) body = extractInterfaceBody(content, match[1]);
     }
@@ -211,7 +205,10 @@ async function processComponent(name) {
 }
 
 async function main() {
-    console.error('Scanning primereact v10 components...');
+    const primereactDir = await findPrimereactDir();
+    console.error(`Using primereact from: ${primereactDir}`);
+    console.error('Scanning primereact components...');
+
     const entries = await readdir(primereactDir);
     const components = [];
     let skipped = 0;
@@ -219,7 +216,7 @@ async function main() {
     for (const entry of entries) {
         // Skip utility directories
         if (['api', 'utils', 'hooks', 'componentbase', 'passthrough', 'csstransition', 'icons'].includes(entry)) continue;
-        const component = await processComponent(entry);
+        const component = await processComponent(entry, primereactDir);
         if (component) {
             components.push(component);
         } else {
@@ -227,8 +224,11 @@ async function main() {
         }
     }
 
+    // Read version from the installed package to support any PrimeReact version
+    const pkgJson = JSON.parse(await readFile(join(primereactDir, 'package.json'), 'utf-8'));
+
     const data = {
-        version: '10.9.8',
+        version: pkgJson.version,
         generatedAt: new Date().toISOString().split('T')[0],
         components,
         pages: []
@@ -239,4 +239,6 @@ async function main() {
     console.error(`Done. ${components.length} components, ${skipped} skipped. Written to ${outPath}`);
 }
 
-main().catch(e => { console.error(e); process.exit(1); });
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+    main().catch(e => { console.error(e); process.exit(1); });
+}

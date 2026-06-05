@@ -1,0 +1,98 @@
+name: Unit Tests
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - '*.mjs'
+      - 'test/**'
+      - 'package*.json'
+      - 'vitest.config.mjs'
+      - '.github/workflows/test.yml'
+  pull_request:
+    branches: [main, master]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── Core unit + integration tests ─────────────────────────────────────────
+  test:
+    name: Test (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['18', '20', '22']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+  # ── Coverage report (Node 20 only) ────────────────────────────────────────
+  coverage:
+    name: Coverage
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate coverage report
+        run: npm run test:coverage
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 14
+
+  # ── PrimeReact v11 forward-compatibility (allowed to fail) ────────────────
+  # Once PrimeReact v11 is released, change PRIMEREACT_VERSION to '11' and
+  # remove continue-on-error once tests are confirmed green.
+  v11-compat:
+    name: v11 compat (continue-on-error)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    env:
+      PRIMEREACT_VERSION: next
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install base dependencies
+        run: npm ci
+
+      - name: Install PrimeReact ${{ env.PRIMEREACT_VERSION }}
+        run: npm install --save-dev primereact@${{ env.PRIMEREACT_VERSION }}
+
+      - name: Regenerate component data with new PrimeReact version
+        run: npm run generate
+
+      - name: Validate schema with regenerated data
+        run: npm test

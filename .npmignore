@@ -1,0 +1,9 @@
+.claude/
+.claude_*/
+test/
+UNIT-TEST.md
+node_modules/
+.gitignore
+.npmignore
+*.log
+.DS_Store
