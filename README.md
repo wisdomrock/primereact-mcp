@@ -183,8 +183,30 @@ primereact-mcp/
 ├── index.mjs              # MCP server entry point
 ├── generate-data.mjs      # Generates components-data.json from .d.ts files
 ├── components-data.json   # Generated component data (committed for convenience)
+├── server.json            # MCP Registry metadata
 ├── package.json
 └── README.md
+```
+
+## MCP Registry
+
+This server is published to the [Official MCP Registry](https://modelcontextprotocol.io). The `server.json` file at the repo root provides the registry metadata:
+
+```json
+{
+  "$schema": "https://registry.modelcontextprotocol.io/schema/v0/server.json",
+  "name": "io.github.wisdomrock/primereact-mcp",
+  "description": "105 PrimeReact v10 components with props, types, and events",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wisdomrock/primereact-mcp.git"
+  },
+  "packages": [{
+    "registry": "npm",
+    "name": "primereact-mcp",
+    "version": "1.1.0"
+  }]
+}
 ```
 
 ### How it works
