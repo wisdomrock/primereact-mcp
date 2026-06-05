@@ -1,14 +1,18 @@
 {
-  "$schema": "https://registry.modelcontextprotocol.io/schema/v0/server.json",
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.wisdomrock/primereact-mcp",
   "description": "105 PrimeReact v10 components with props, types, and events",
   "version": "1.1.1",
   "repository": {
-    "type": "git",
-    "url": "https://github.com/wisdomrock/primereact-mcp.git"
+    "url": "https://github.com/wisdomrock/primereact-mcp",
+    "source": "github"
   },
   "packages": [{
     "registryType": "npm",
-    "identifier": "primereact-mcp"
+    "identifier": "primereact-mcp",
+    "version": "1.1.1",
+    "transport": {
+      "type": "stdio"
+    }
   }]
 }
